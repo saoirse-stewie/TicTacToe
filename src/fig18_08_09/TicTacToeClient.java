@@ -36,7 +36,7 @@ public class TicTacToeClient extends JApplet implements Runnable {
 
 
       Container container = getContentPane();
-      reset = new JButton("yes");
+      reset = new JButton("restart");
       quit = new JButton("quit");
       // set up JTextArea to display messages to user
       displayArea = new JTextArea( 4, 30 );
@@ -145,13 +145,15 @@ public class TicTacToeClient extends JApplet implements Runnable {
             // receive messages sent to client and output them
 
             while (true) {
-               while (input.available() > 0) {
+              while (input.available() > 0) {
                   processMessage(input.readUTF());
+
                }
-               //System.out.println(input.readUTF());
+              // System.out.println(input.readUTF());
 
 
             }
+
 
 
          } // end try
@@ -170,77 +172,41 @@ public class TicTacToeClient extends JApplet implements Runnable {
    private void processMessage( String message ) throws IOException {
       Container container = getContentPane();
       // valid move occurred
-      if ( message.equals( "Valid move." ) ) {
-         displayMessage( "Valid move, please wait.\n" );
-         setMark( currentSquare, myMark );
+     // try {
+      if (message.equals("Valid move.")) {
+         displayMessage("Valid move, please wait.\n");
+         setMark(currentSquare, myMark);
       }
 
       // invalid move occurred
-      else if ( message.equals( "Invalid move, try again" ) ) {
-         displayMessage( message + "\n" );
+      else if (message.equals("Invalid move, try again")) {
+         displayMessage(message + "\n");
          myTurn = true;
       }
 
       // opponent moved
-      else if ( message.equals( "Opponent moved" ) ) {
+      else if (message.equals("Opponent moved")) {
 
-         // get move location and update board
-         try {
+         // get move location and update boar
 
-               int location = input.readInt();
+         int location = input.readInt();
 
-               int row = location / 3;
-               int column = location % 3;
+         int row = location / 3;
+         int column = location % 3;
 
-               setMark(board[row][column],
-                       (myMark == X_MARK ? O_MARK : X_MARK));
-               displayMessage("Opponent moved. Your turn.\n");
-               myTurn = true;
+         setMark(board[row][column],
+                 (myMark == X_MARK ? O_MARK : X_MARK));
+         displayMessage("Opponent moved. Your turn.\n");
+         myTurn = true;
+      } else if (message.equals("draw")) {
+         displayMessage("Draw; No winners");
 
-               // end try
-
-         }
-         // process problems communicating with server
-         catch (IOException ioException) {
-            ioException.printStackTrace();
-         }
-      }
-        else if (message.equals("draw")) {
-            displayMessage("here");
-
-             //init();
-
-         } // end else if
+      } // end else if
       else if (message.equals("winner")) {
          displayMessage("Winner is Player :" + myMark);
-
       }
-      else if (message.equals("loser")) {
-         displayMessage("Loser is Player :" + myMark);
-
-      }
-      else
-         displayMessage( message + "\n" );
-      if(message.equals("Game Over")){
-         displayMessage("Game over everybody");
-
-        // gameOver();
-        // connection.close();
-
-
-        // System.exit(0);
-
-      }
-
 
    }
-
-   //private void gameOver()
-  // {
-
-
-     // panel2.add(reset);
-  // }
 
 
 // end method processMessage
@@ -289,8 +255,6 @@ public class TicTacToeClient extends JApplet implements Runnable {
                   output.writeInt(location);
                   output.flush();
                   myTurn = false;
-
-
             }
 
             // process problems communicating with server

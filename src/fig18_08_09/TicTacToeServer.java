@@ -19,6 +19,7 @@ public class TicTacToeServer extends JFrame {
    private int currentPlayer;
    private final int PLAYER_X = 0, PLAYER_O = 1;
    private final char X_MARK = 'X', O_MARK = 'O';boolean gameover=true;
+    ExecutorService executorService = Executors.newFixedThreadPool(2);
 
    // set up tic-tac-toe server and GUI that displays messages
    public TicTacToeServer()
@@ -45,7 +46,7 @@ public class TicTacToeServer extends JFrame {
       getContentPane().add( outputArea, BorderLayout.CENTER );
       outputArea.setText( "Server awaiting connections\n" );
 
-      setSize( 300, 300 );
+      setSize(300, 300);
       setVisible(true);
 
    } // end TicTacToeServer constructor
@@ -53,17 +54,19 @@ public class TicTacToeServer extends JFrame {
    // wait for two connections so game can be played
    public void execute()
    {
-       ExecutorService executorService = Executors.newFixedThreadPool(2);
+
       // wait for each client to connect
 
-       executorService.execute(new Runnable() {
-           public void run() {
+      // executorService.execute(new Runnable() {
+          // public void run() {
                for (int i = 0; i < players.length; i++) {
 
                    // wait for connection, create Player, start thread
                    try {
                        players[i] = new Player(server.accept(), i);
-                       players[i].start();
+                       //players[i].start();
+                       executorService.execute(players[i]);
+
                    }
 
                    // process problems receiving connection from client
@@ -80,8 +83,8 @@ public class TicTacToeServer extends JFrame {
                    players[PLAYER_X].notify();
                }
 
-           }
-      });executorService.shutdown();
+         //  }
+     // });executorService.shutdown();
   }// end method execute
    
    // utility method called from other threads to manipulate 
@@ -95,8 +98,8 @@ public class TicTacToeServer extends JFrame {
             public void run() // updates outputArea
             {
                outputArea.append( messageToDisplay );
-               outputArea.setCaretPosition( 
-                  outputArea.getText().length() );
+               outputArea.setCaretPosition(
+                       outputArea.getText().length() );
             }
 
          }  // end inner class
@@ -185,7 +188,7 @@ public class TicTacToeServer extends JFrame {
                 ||board[1] !='\u0000' && board[1]==board[4]&&board[1]==board[7]
                 ||board[2] !='\u0000' && board[2]==board[5]&&board[2]==board[8]
                 ||board[0] !='\u0000' && board[0]==board[4]&&board[0]==board[8]
-                ||board[2] !='\u0000' && board[2]==board[4]&&board[6]==board[6]);
+                ||board[2] !='\u0000' && board[2]==board[4]&&board[2]==board[6]);
 
 
     }
@@ -232,14 +235,22 @@ public class TicTacToeServer extends JFrame {
       } // end Player constructor
 
       // send message that other player moved
-      public void otherPlayerMoved( int location )
+      public synchronized void  otherPlayerMoved( int location )
       {
          // send message indicating move
          try {
+             if(isGameOver())
+             {
 
+                 output.writeUTF("game over");
+                 connection.close();
+
+             }
+             else {
                  output.writeUTF("Opponent moved");
                  output.flush();
                  output.writeInt(location);
+             }
 
          }
 
@@ -287,7 +298,7 @@ public class TicTacToeServer extends JFrame {
             }
              isGameOver();
              boolean done = false;
-            // while game not over
+            // while game not ove
             while( !isGameOver()) {
 
                 System.out.println("keep going");
@@ -300,29 +311,31 @@ public class TicTacToeServer extends JFrame {
                         displayMessage("\nlocation: " + location);
                         output.writeUTF("Valid move.");
                         output.flush();
+                    }else
+                        output.writeUTF("Invalid move, try again");
                         if (boardFilledUp()) {
                             output.writeUTF("draw");
-                            output.flush();
-
-
+                           output.flush();
                         } else if (winner()) {
-                            output.writeUTF("winner");
-                            output.flush();
+                           output.writeUTF("winner");
+                           output.flush();
 
-                        }
-                    } else
-                        output.writeUTF("Invalid move, try again");
+                    }
 
                 }
 
 
             }
-             if(isGameOver())
-             {
-                 output.writeUTF("Game Over");
-                 output.flush();
-             }
-            connection.close(); // close connection to client
+
+             //if(isGameOver())
+             //{
+              //   output.writeUTF("game over");
+           //  }
+             output.close();
+             input.close();
+             connection.close();
+
+             // close connection to client
 
          } // end try
 
