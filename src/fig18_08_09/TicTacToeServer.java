@@ -19,7 +19,7 @@ public class TicTacToeServer extends JFrame {
    private int currentPlayer;
    private final int PLAYER_X = 0, PLAYER_O = 1;
    private final char X_MARK = 'X', O_MARK = 'O';
-    private static boolean  test = false;
+    private  boolean  test = false;
     private static boolean  test2 = false;
     ExecutorService executorService = Executors.newFixedThreadPool(2);
 
@@ -95,16 +95,16 @@ public class TicTacToeServer extends JFrame {
    {
       // display message from event-dispatch thread of execution
       SwingUtilities.invokeLater(
-         new Runnable() {  // inner class to ensure GUI updates properly
+              new Runnable() {  // inner class to ensure GUI updates properly
 
-            public void run() // updates outputArea
-            {
-               outputArea.append( messageToDisplay );
-               outputArea.setCaretPosition(
-                       outputArea.getText().length() );
-            }
+                  public void run() // updates outputArea
+                  {
+                      outputArea.append(messageToDisplay);
+                      outputArea.setCaretPosition(
+                              outputArea.getText().length());
+                  }
 
-         }  // end inner class
+              }  // end inner class
 
       ); // end call to SwingUtilities.invokeLater
    }
@@ -165,10 +165,6 @@ public class TicTacToeServer extends JFrame {
    // place code in this method to determine whether game over 
    public synchronized boolean isGameOver()
    {
-
-       if(test==true)
-           test2=true;
-           //displayMessage("hi");
 
        return boardFilledUp() || winner()  ;
    }
@@ -249,18 +245,22 @@ public class TicTacToeServer extends JFrame {
       {
          // send message indicating move
 
-
-
           try {
 
              if(isGameOver())
              {
+
                  output.writeUTF("game over");
                  output.flush();
                  output.writeInt(location);
                  output.flush();
-                 System.out.println(test2);
+
+                 //System.out.println(test2);
+
              }
+
+
+
              else {
                  output.writeUTF("Opponent moved");
                  output.flush();
@@ -275,18 +275,36 @@ public class TicTacToeServer extends JFrame {
             ioException.printStackTrace();
          }
       }
+       public void reset()
+       {
+           for (int i = 0; i < board.length; i++) {
+               board[i] = 0;
+           }
+           displayMessage("Player " + (playerNumber ==
+                   PLAYER_X ? X_MARK : O_MARK ) + " connected\n" );
+           test=true;
+        //   players[ currentPlayer ].start();
 
+       }
       // control thread's execution
       public void run()
       {
          // send client message indicating its mark (X or O),
          // process messages from client
          try {
+             if(test==true) {
+
+                 output.writeUTF("ready");
+                 output.flush();
+                 test=false;
+                 // players[currentPlayer].start();
+             }
 
 
-                displayMessage( "Player " + ( playerNumber ==
-                PLAYER_X ? X_MARK : O_MARK ) + " connected\n" );
- 
+                 //displayMessage("" + test);
+                //displayMessage("" + test);
+             displayMessage("Player " + (playerNumber ==
+                     PLAYER_X ? X_MARK : O_MARK ) + " connected\n" );
                 output.writeChar( mark ); // send player's mark
 
             // send message indicating connection
@@ -295,9 +313,8 @@ public class TicTacToeServer extends JFrame {
 
             // if player X, wait for another player to arrive
                 if ( mark == X_MARK ) {
-                   output.writeUTF( "Waiting for another player" );
-                   // displayMessage("waiting");
-   
+                    output.writeUTF("Waiting for another player" );
+
                // wait for player O
                try {
                   synchronized( this ) {   
@@ -313,51 +330,72 @@ public class TicTacToeServer extends JFrame {
                }
 
                // send message that other player connected and
-               // player X can make a move
-               output.writeUTF( "Other player connected. Your move." );
+                    // player X can make a move
+                    output.writeUTF( "Other player connected. Your move." );
             }
 
              boolean done = false;
             // while game not ove
             while( !isGameOver()) {
-
+                System.out.println("here");
                 // get move location from client
                 while(input.available()>0) {
 
                     int location = input.readInt();
 
                     // check for valid move
-
                     if (validateAndMove(location, playerNumber)) {
                         displayMessage("\nlocation: " + location);
                         output.writeUTF("Valid move.");
+                        output.flush();
                         displayMessage("valid");
 
                     }else
                         output.writeUTF("Invalid move, try again");
-                        if (boardFilledUp()) {
+                    if (boardFilledUp()) {
                             output.writeUTF("draw");
                            output.flush();
                         } else if (winner()) {
-                           output.writeUTF("winner");
-                           output.flush();
-                            String message = input.readUTF();
-                            if(message.equals("begin"))
-                            {
-                                for (int i = 0; i < board.length; i++) {
-                                    board[i] = '\u0000';
-                                }
-                                test=true;
-                            }
+                        output.writeUTF("winner");
+                        output.flush();
+                        String message = input.readUTF();
+                        if (message.equals("begin")) {
+                            //players[currentPlayer].start();//o
+                            outputArea.setText("");
+                            repaint();
+                            outputArea.setText("Server awaiting connections\n");
+                            repaint();
 
-                            //break;
+
+                            currentPlayer = (currentPlayer + 1) % 2;
+                            players[currentPlayer].reset();
+                           // displayMessage("" + currentPlayer);
+                            currentPlayer = (currentPlayer + 1) % 2;
+
+                        //    for(int i =0;i<players.length;i++) {
+                            players[currentPlayer].start();
+                             //   currentPlayer = (currentPlayer + 1) % 2;
+                         //   }
+
+                           // displayMessage("" + currentPlayer);
+
+
+
+
+                            //currentPlayer = ( currentPlayer + 1) % 2;
                         }
+
+
+                        //break;
+                    }
+
 
 
                 }
 
 
             }
+             test=false;
 
              //System.out.println(test +" " + mark);
             // if(test)
