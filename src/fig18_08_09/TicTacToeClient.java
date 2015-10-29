@@ -125,6 +125,8 @@ public class TicTacToeClient extends JApplet implements Runnable {
 
             myMark = input.readChar();
 
+            System.out.print(myMark);
+
 
             // display player ID in event-dispatch thread
             SwingUtilities.invokeLater(
@@ -144,6 +146,7 @@ public class TicTacToeClient extends JApplet implements Runnable {
 
               while (input.available() > 0) {
                   processMessage(input.readUTF());
+                // System.out.print(input.readUTF());
 
                }
               // System.out.println(input.readUTF());
@@ -168,19 +171,19 @@ public class TicTacToeClient extends JApplet implements Runnable {
    // process messages received by client
    private void processMessage( String message ) throws IOException {
 
-
         if (message.equals("Valid move.")) {
            displayMessage("Valid move, please wait.\n");
            setMark(currentSquare, myMark);
-          // break;
+           repaint();
         }
 
         // invalid move occurred
         else if (message.equals("Invalid move, try again")) {
            displayMessage(message + "\n");
            myTurn = true;
+
+
         } else if (message.equals("game over")) {
-           displayMessage("here");
            int location = input.readInt();
            int row = location / 3;
            int column = location % 3;
@@ -189,26 +192,21 @@ public class TicTacToeClient extends JApplet implements Runnable {
                    (myMark == X_MARK ? O_MARK : X_MARK));
            displayMessage("Loser is: " + myMark);
            myTurn = false;
-          // restart();
-           // output.writeUTF("hi");
-           message = input.readUTF();
-           if(message.equals("server ready"))
-              displayMessage(message);
 
-           // restart();
-
-           // restart();
         }
         // opponent moved
         else if (message.equals("Opponent moved")) {
 
            // get move location and update boar
-           displayMessage("here");
+           //displayMessage("here");
            int location = input.readInt();
            //System.out.print(location);
            int row = location / 3;
            int column = location % 3;
 
+           setMark(board[row][column],
+                   (myMark == X_MARK ? O_MARK : X_MARK));
+           repaint();
            setMark(board[row][column],
                    (myMark == X_MARK ? O_MARK : X_MARK));
            repaint();
@@ -229,33 +227,34 @@ public class TicTacToeClient extends JApplet implements Runnable {
            myTurn = false;
            gameover = true;
 
-           if (gameover) {
+           //if (gameover) {
               reset.addActionListener(new ActionListener() {
-                 public void actionPerformed(ActionEvent e) {
-                    restart();
-                    try {
 
+              public void actionPerformed(ActionEvent e) {
+                 restart();
+                   try {
                        output.writeUTF("begin");
                        output.flush();
-
-                       gameover = false;
 
                     } catch (IOException e1) {
                        e1.printStackTrace();
                     }
 
                  }
-              });
-
-           }
-
+             });
+         return;
+         //  }
         }
+        else if(message.equals("ready"))
+        {
+           restart();
+           //System.out.print(location);
 
-      //else if(message.equals("server ready"))
-     // displayMessage("hi");
-
-
-
+           displayMessage("Opponent moved. Your turn.\n");
+           repaint();
+           myTurn = true;
+           //return;
+        }
 
    }
 
@@ -269,11 +268,11 @@ public class TicTacToeClient extends JApplet implements Runnable {
       }
       repaint();
       displayArea.setText("");
-     repaint();
-
-
-
+      repaint();
+      myTurn=true;
    }
+
+
 // end method processMessage
 
    // utility method called from other threads to manipulate 
