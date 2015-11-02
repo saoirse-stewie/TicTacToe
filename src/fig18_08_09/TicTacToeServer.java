@@ -115,8 +115,12 @@ public class TicTacToeServer extends JFrame {
    {
       boolean moveDone = false;
 
+
+     //
       // while not current player, must wait for turn
       while ( player != currentPlayer ) {
+
+
          
          // wait for turn
          try {
@@ -129,6 +133,7 @@ public class TicTacToeServer extends JFrame {
          }
       }
 
+
       // if location not occupied, make move
       if ( !isOccupied( location ) ) {
   
@@ -139,19 +144,32 @@ public class TicTacToeServer extends JFrame {
          currentPlayer = ( currentPlayer + 1 ) % 2;
 
          // let new current player know that move occurred
-         players[ currentPlayer ].otherPlayerMoved( location );
+         players[ currentPlayer ].otherPlayerMoved(location);
 
          notify(); // tell waiting player to continue
 
-         // tell player that made move that the move was valid
-         return true; 
+          if(isGameOver())
+          {
+
+              for(int i=0;i<players.length;i++) {
+                  players[i].reset();
+              }
+              return true;
+          }
+
+          return true;
+
+          // tell player that made move that the move was valid
+
       }
+
 
       // tell player that made move that the move was not valid
       else 
          return false;
 
    } // end method validateAndMove
+
 
    // determine whether location is occupied
    public boolean isOccupied( int location )
@@ -241,33 +259,37 @@ public class TicTacToeServer extends JFrame {
       } // end Player constructor
 
       // send message that other player moved
-      public synchronized void  otherPlayerMoved( int location )
-      {
+      public synchronized void  otherPlayerMoved( int location ) {
          // send message indicating move
 
           try {
 
-             if(isGameOver())
+              if(isGameOver())
              {
 
-                 output.writeUTF("game over");
+                output.writeUTF("game over");
                  output.flush();
                  output.writeInt(location);
-                 output.flush();
+                  output.flush();
+                // output.writeUTF("ready");
+                 //if(test)
 
-                 //System.out.println(test2);
 
+
+
+            //    System.out.println(test2);
+//
              }
 
 
 
-             else {
+            /// else {
                  output.writeUTF("Opponent moved");
                  output.flush();
 
                 // displayMessage("here");
                  output.writeInt(location);
-             }
+            // }
          }
 
           // process problems sending message
@@ -279,10 +301,11 @@ public class TicTacToeServer extends JFrame {
        {
            for (int i = 0; i < board.length; i++) {
                board[i] = 0;
+               displayMessage(""+ board[i]);
            }
            displayMessage("Player " + (playerNumber ==
                    PLAYER_X ? X_MARK : O_MARK ) + " connected\n" );
-           test=true;
+         //  test=true;
         //   players[ currentPlayer ].start();
 
        }
@@ -292,20 +315,24 @@ public class TicTacToeServer extends JFrame {
          // send client message indicating its mark (X or O),
          // process messages from client
          try {
-             if(test==true) {
 
-                 output.writeUTF("ready");
-                 output.flush();
-                 test=false;
+             //if(test==true) {
+
+              //  output.writeUTF("ready");
+           // }
+                // test=false;
                  // players[currentPlayer].start();
-             }
+             //}
+            // if(isGameOver()) {
 
+            // }
 
                  //displayMessage("" + test);
                 //displayMessage("" + test);
              displayMessage("Player " + (playerNumber ==
-                     PLAYER_X ? X_MARK : O_MARK ) + " connected\n" );
-                output.writeChar( mark ); // send player's mark
+                     PLAYER_X ? X_MARK : O_MARK) + " connected\n");
+                output.writeChar(mark); // send player's mark
+
 
             // send message indicating connection
                 output.writeUTF( "Player " + ( playerNumber == PLAYER_X ?
@@ -346,34 +373,61 @@ public class TicTacToeServer extends JFrame {
                     // check for valid move
                     if (validateAndMove(location, playerNumber)) {
                         displayMessage("\nlocation: " + location);
+                        displayMessage("" + currentPlayer);
                         output.writeUTF("Valid move.");
                         output.flush();
-                        displayMessage("valid");
+
+
+
+                       // if (message.equals("begin")) {
+
+                        //    test = true;
+                        //}
+                        //test=true;
 
                     }else
                         output.writeUTF("Invalid move, try again");
                     if (boardFilledUp()) {
                             output.writeUTF("draw");
                            output.flush();
-                        } else if (winner()) {
+                        } else  if (winner()) {
                         output.writeUTF("winner");
                         output.flush();
-                        String message = input.readUTF();
-                        if (message.equals("begin")) {
+                        String message =input.readUTF();
+                        displayMessage(message);
+                        if(message.equals("begin")) {
+                            test = true;
+                           // players[currentPlayer].run();
+                            //validateAndMove(location,playerNumber);
+
+                        }
+                       // if(message.equals("begin"))
+                         //   test=true;
+                      // / validateAndMove(location,playerNumber);
+                        //players[ currentPlayer ].otherPlayerMoved(location);
+
+                       // test=true;
+                    }
+
+
+
+
+
+
                             //players[currentPlayer].start();//o
-                            outputArea.setText("");
-                            repaint();
-                            outputArea.setText("Server awaiting connections\n");
-                            repaint();
+                          //  outputArea.setText("");
+                           // repaint();
+                          //  outputArea.setText("Server awaiting connections\n");
+                          //  repaint();
 
 
-                            currentPlayer = (currentPlayer + 1) % 2;
-                            players[currentPlayer].reset();
+                          //  currentPlayer = (currentPlayer + 1) % 2;
+                           // players[currentPlayer].reset();
                            // displayMessage("" + currentPlayer);
-                            currentPlayer = (currentPlayer + 1) % 2;
+                           // currentPlayer = (currentPlayer + 1) % 2;
 
                         //    for(int i =0;i<players.length;i++) {
-                            players[currentPlayer].start();
+                          ///  players[currentPlayer].run();
                              //   currentPlayer = (currentPlayer + 1) % 2;
                          //   }
 
@@ -383,11 +437,11 @@ public class TicTacToeServer extends JFrame {
 
 
                             //currentPlayer = ( currentPlayer + 1) % 2;
-                        }
+                       // }
 
 
                         //break;
-                    }
+
 
 
 
@@ -395,7 +449,13 @@ public class TicTacToeServer extends JFrame {
 
 
             }
-             test=false;
+
+         //    if(isGameOver())
+
+              //   String m = input.readUTF();
+            //     displayMessage(m);
+             //}
+          //   test=true;
 
              //System.out.println(test +" " + mark);
             // if(test)

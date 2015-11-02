@@ -3,8 +3,6 @@ package fig18_08_09;// Fig. 18.9: TicTacToeClient.java
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.DataInputStream;
@@ -125,8 +123,9 @@ public class TicTacToeClient extends JApplet implements Runnable {
 
             myMark = input.readChar();
 
-            System.out.print(myMark);
+            String message = input.readUTF();
 
+            displayMessage(message + myMark);
 
             // display player ID in event-dispatch thread
             SwingUtilities.invokeLater(
@@ -139,6 +138,16 @@ public class TicTacToeClient extends JApplet implements Runnable {
 
 
             myTurn = (myMark == X_MARK ? true : false);
+          //   if(message.equals("ready"))
+            {
+              // restart();
+               //System.out.print(location);
+
+               //  displayMessage("Opponent moved. Your turn.\n");
+               //  repaint();
+               //  myTurn = true;
+               //return;
+            }
 
             // receive messages sent to client and output them
 
@@ -146,6 +155,8 @@ public class TicTacToeClient extends JApplet implements Runnable {
 
               while (input.available() > 0) {
                   processMessage(input.readUTF());
+
+
                 // System.out.print(input.readUTF());
 
                }
@@ -173,8 +184,38 @@ public class TicTacToeClient extends JApplet implements Runnable {
 
         if (message.equals("Valid move.")) {
            displayMessage("Valid move, please wait.\n");
+
+           
+
+           //reset.addActionListener(new ActionListener() {
+
+             // public void actionPerformed(ActionEvent e) {
+               //  restart();
+              //  try {
+               ////     output.writeUTF("begin");
+                   // output.flush();
+
+               //  } catch (IOException e1) {
+               //     e1.printStackTrace();
+               //  }
+
+             // }
+       //    });
+
+           //if(gameover)
+           //output.writeUTF("begin");
+
+
+          // output.writeUTF("begin");
+
+
+
+
+
            setMark(currentSquare, myMark);
            repaint();
+
+
         }
 
         // invalid move occurred
@@ -184,6 +225,8 @@ public class TicTacToeClient extends JApplet implements Runnable {
 
 
         } else if (message.equals("game over")) {
+
+
            int location = input.readInt();
            int row = location / 3;
            int column = location % 3;
@@ -192,6 +235,11 @@ public class TicTacToeClient extends JApplet implements Runnable {
                    (myMark == X_MARK ? O_MARK : X_MARK));
            displayMessage("Loser is: " + myMark);
            myTurn = false;
+          // String m = input.readUTF();
+         //  if(m.equals("ready"))
+           //   restart();
+
+
 
         }
         // opponent moved
@@ -226,35 +274,29 @@ public class TicTacToeClient extends JApplet implements Runnable {
 
            myTurn = false;
            gameover = true;
+          // if (gameover) {
+             // reset.addActionListener(new ActionListener() {
 
-           //if (gameover) {
-              reset.addActionListener(new ActionListener() {
+               //  public void actionPerformed(ActionEvent e) {
+                 //   restart();
+                  //  try {
+                   //    output.writeUTF("begin");
+                   //    output.flush();
 
-              public void actionPerformed(ActionEvent e) {
-                 restart();
-                   try {
-                       output.writeUTF("begin");
-                       output.flush();
+                   // } catch (IOException e1) {
+                   // /   e1.printStackTrace();
+                   // }
 
-                    } catch (IOException e1) {
-                       e1.printStackTrace();
-                    }
+                // }
+             // });
+           }//if (gameover) {
 
-                 }
-             });
-         return;
          //  }
-        }
-        else if(message.equals("ready"))
-        {
-           restart();
-           //System.out.print(location);
+       // }
+     // else {
+       // displayMessage(message);
+      //  }
 
-           displayMessage("Opponent moved. Your turn.\n");
-           repaint();
-           myTurn = true;
-           //return;
-        }
 
    }
 
