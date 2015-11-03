@@ -3,6 +3,8 @@ package fig18_08_09;// Fig. 18.9: TicTacToeClient.java
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.DataInputStream;
@@ -185,35 +187,11 @@ public class TicTacToeClient extends JApplet implements Runnable {
         if (message.equals("Valid move.")) {
            displayMessage("Valid move, please wait.\n");
 
-           
-
-           //reset.addActionListener(new ActionListener() {
-
-             // public void actionPerformed(ActionEvent e) {
-               //  restart();
-              //  try {
-               ////     output.writeUTF("begin");
-                   // output.flush();
-
-               //  } catch (IOException e1) {
-               //     e1.printStackTrace();
-               //  }
-
-             // }
-       //    });
-
-           //if(gameover)
-           //output.writeUTF("begin");
-
-
-          // output.writeUTF("begin");
-
-
-
-
 
            setMark(currentSquare, myMark);
            repaint();
+
+
 
 
         }
@@ -235,9 +213,11 @@ public class TicTacToeClient extends JApplet implements Runnable {
                    (myMark == X_MARK ? O_MARK : X_MARK));
            displayMessage("Loser is: " + myMark);
            myTurn = false;
-          // String m = input.readUTF();
-         //  if(m.equals("ready"))
-           //   restart();
+
+
+         //  String m = input.readUTF();
+           //if(m.equals("ready"))
+           //  restart();
 
 
 
@@ -274,30 +254,34 @@ public class TicTacToeClient extends JApplet implements Runnable {
 
            myTurn = false;
            gameover = true;
-          // if (gameover) {
-             // reset.addActionListener(new ActionListener() {
+           if (gameover) {
+              reset.addActionListener(new ActionListener() {
 
-               //  public void actionPerformed(ActionEvent e) {
-                 //   restart();
-                  //  try {
-                   //    output.writeUTF("begin");
-                   //    output.flush();
+                 public void actionPerformed(ActionEvent e) {
+                    restart();
+                    try {
+                       output.writeUTF("begin");
+                       output.flush();
 
-                   // } catch (IOException e1) {
-                   // /   e1.printStackTrace();
-                   // }
+                    } catch (IOException e1) {
+                       e1.printStackTrace();
+                    }
 
-                // }
-             // });
+                 }
+              });
            }//if (gameover) {
 
-         //  }
-       // }
-     // else {
-       // displayMessage(message);
-      //  }
+           //  }
+           // }
+           // else {
+           // displayMessage(message);
+           //  }
 
 
+        }
+      if(message.equals("ready"))
+         restart();
+         //displayMessage(message);
    }
 
    public void restart() {
